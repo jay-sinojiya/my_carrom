@@ -88,8 +88,8 @@ export const getBotMove = (striker, coins, difficulty = "medium") => {
   // Add human-like randomness
   angle += (Math.random() - 0.5) * randomness;
 
-  // Adjust strike force based on distance + difficulty
-  const force = Math.min(minDist * powerFactor, 2.0);
+  // Adjust strike force based on distance + difficulty (scaled to match human power up to 8.0)
+  const force = Math.min(minDist * powerFactor * 3.5, 8.0);
 
   return { angle, force };
 };

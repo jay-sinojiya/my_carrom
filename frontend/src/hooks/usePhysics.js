@@ -18,10 +18,8 @@ export const usePhysics = () => {
 
       if (!active) return;
 
-      // Free previous world if it existed but was leaked
-      if (worldRef.current) {
-         try { worldRef.current.free(); } catch(e){}
-      }
+      // Reset reference to avoid leakage
+      worldRef.current = null;
 
       // Create a fresh world for this exact component mount
       const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
@@ -33,11 +31,7 @@ export const usePhysics = () => {
 
     return () => {
       active = false;
-      if (worldRef.current) {
-        // Correctly free the WASM physics memory to avoid unreachable panics
-        try { worldRef.current.free(); } catch(e){}
-        worldRef.current = null;
-      }
+      worldRef.current = null;
       setIsReady(false);
     };
   }, []);

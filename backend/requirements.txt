@@ -1,0 +1,7 @@
+Django>=5.0
+channels>=4.0
+channels_redis>=4.0
+daphne>=4.0
+djangorestframework>=3.14
+django-cors-headers>=4.0
+redis>=5.0

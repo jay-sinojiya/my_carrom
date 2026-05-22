@@ -41,6 +41,7 @@ export default function CarromScene({ roomId }) {
   const strikerRef = useRef(null); // Ref for stable WebSocket closure access
   const coinsRef = useRef([]);
   const isTurnActive = useRef(false);
+  const strikeTimeRef = useRef(0);
   const botTimeoutRef = useRef(null);
   const botHasPlayedRef = useRef(false);
   const canStrikeRef = useRef(true); // Strike cooldown lock
@@ -56,6 +57,7 @@ export default function CarromScene({ roomId }) {
           const z = Math.sin(angle) * force;
           // Use a ref to access strikerObj safely
           strikerRef.current?.body.applyImpulse({ x, y: 0, z }, true);
+          strikeTimeRef.current = Date.now();
           isTurnActive.current = true;
         }
       } else if (data.type === "turn") {
@@ -201,8 +203,8 @@ export default function CarromScene({ roomId }) {
         }
       }
 
-      // Check if turn ended (everything stopped moving)
-      if (isTurnActive.current) {
+      // Check if turn ended (everything stopped moving, checking at least 500ms after a strike to prevent premature transition)
+      if (isTurnActive.current && Date.now() - strikeTimeRef.current > 500) {
         let moving = false;
         for (let i = 0; i < coinsRef.current.length; i++) {
           const v = coinsRef.current[i].body.linvel();
@@ -241,6 +243,7 @@ export default function CarromScene({ roomId }) {
                   const x = Math.cos(angle) * force;
                   const z = Math.sin(angle) * force;
                   strikerObj.body.applyImpulse({ x, y: 0, z }, true);
+                  strikeTimeRef.current = Date.now();
                   isTurnActive.current = true;
                 }
               }, botDelay);
@@ -309,6 +312,7 @@ export default function CarromScene({ roomId }) {
   const handleStrike = useCallback((force, angle) => {
     if (!canStrikeRef.current) return;
     canStrikeRef.current = false;
+    strikeTimeRef.current = Date.now();
     isTurnActive.current = true;
 
     // Cooldown
